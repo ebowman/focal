@@ -7,6 +7,7 @@ __pycache__/
 env/
 venv/
 .venv
+workflow/venv/
 
 # API Keys - NEVER commit these!
 openai_key.txt
