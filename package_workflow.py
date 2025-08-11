@@ -26,10 +26,10 @@ def create_workflow_package():
     # Generate package filename with version
     version = "1.0.0"
     timestamp = datetime.now().strftime('%Y%m%d')
-    package_name = f"Fantastical_AI_Calendar_v{version}_{timestamp}.alfredworkflow"
+    package_name = f"FOCAL_v{version}_{timestamp}.alfredworkflow"
     package_path = dist_dir / package_name
     
-    print("🚀 Fantastical AI Calendar - Workflow Packager")
+    print("🚀 FOCAL - Workflow Packager")
     print("=" * 50)
     print(f"Version: {version}")
     print(f"Package: {package_name}")
@@ -127,12 +127,12 @@ def create_default_icon(icon_path):
 
 def create_installation_guide(dist_dir, version):
     """Create user-friendly installation guide."""
-    guide_content = f"""# Fantastical AI Calendar - Installation Guide
+    guide_content = f"""# FOCAL - Installation Guide
 
 ## 🚀 Quick Start
 
 ### 1. Install the Workflow
-- Double-click `Fantastical_AI_Calendar_v{version}.alfredworkflow`
+- Double-click `FOCAL_v{version}.alfredworkflow`
 - Alfred will automatically import and install it
 
 ### 2. Configure OpenAI API Key
@@ -162,17 +162,17 @@ Choose your preferred method:
 
 ### 3. Start Using
 - Open Alfred (⌘ + Space)
-- Type `fc` followed by your event
+- Type `focal` followed by your event
 - Press Enter to create
 
 ## 📅 Usage Examples
 
 ```
-fc Lunch with Sarah tomorrow at noon
-fc Team meeting Monday 2pm in Conference Room A
-fc Doctor appointment next Friday at 9:30am
-fc Weekly standup every Monday at 10am
-fc Birthday party Saturday 7pm at John's house
+focal Lunch with Sarah tomorrow at noon
+focal Team meeting Monday 2pm in Conference Room A
+focal Doctor appointment next Friday at 9:30am
+focal Weekly standup every Monday at 10am
+focal Birthday party Saturday 7pm at John's house
 ```
 
 ## 🔑 Getting an OpenAI API Key

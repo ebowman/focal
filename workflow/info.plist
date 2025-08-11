@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>bundleid</key>
-	<string>com.ericbowman.fantastical.openai</string>
+	<string>com.ebowman.focal</string>
 	<key>category</key>
 	<string>Productivity</string>
 	<key>connections</key>
@@ -29,7 +29,7 @@
 	<key>disabled</key>
 	<false/>
 	<key>name</key>
-	<string>Fantastical AI Calendar</string>
+	<string>FOCAL - Fantastical Calendar Assistant for Alfred</string>
 	<key>objects</key>
 	<array>
 		<dict>
@@ -38,7 +38,7 @@
 				<key>argumenttype</key>
 				<integer>0</integer>
 				<key>keyword</key>
-				<string>fc</string>
+				<string>focal</string>
 				<key>subtext</key>
 				<string>Natural language event (e.g., "Lunch tomorrow at noon")</string>
 				<key>text</key>
@@ -78,7 +78,7 @@
 		</dict>
 	</array>
 	<key>readme</key>
-	<string>Fantastical AI Calendar - OpenAI-Powered Event Creation
+	<string>FOCAL - Fantastical OpenAI Calendar Alfred Link
 
 This workflow transforms natural language into perfectly formatted Fantastical calendar events using OpenAI's advanced language processing.
 
@@ -93,10 +93,10 @@ FEATURES:
 • Secure API key storage
 
 USAGE:
-Type 'fc' followed by your event in natural language:
-• fc Lunch with Sarah tomorrow at noon
-• fc Team standup every Monday at 10am
-• fc Doctor appointment next Friday at 3:30pm at Medical Center
+Type 'focal' followed by your event in natural language:
+• focal Lunch with Sarah tomorrow at noon
+• focal Team standup every Monday at 10am
+• focal Doctor appointment next Friday at 3:30pm at Medical Center
 
 SETUP:
 1. Install the workflow

@@ -31,7 +31,7 @@ Fantastical's natural language parser is powerful but can be finicky about synta
 1. **Download** the latest release from [Releases](https://github.com/ebowman/fantastical-alfred-ai/releases)
 2. **Double-click** the `.alfredworkflow` file
 3. **Configure** your OpenAI API key (see below)
-4. **Start creating** events with `fc`
+4. **Start creating** events with `focal`
 
 ## 🔑 Configuration
 
@@ -56,14 +56,14 @@ echo "sk-your-api-key" > openai_key.txt
 
 ## 🚀 Usage
 
-Type `fc` in Alfred followed by your natural language event:
+Type `focal` in Alfred followed by your natural language event:
 
 ```
-fc Lunch with Sarah tomorrow at noon
-fc Team standup every Monday at 10am
-fc Doctor appointment next Friday at 3:30pm at Medical Center
-fc Conference call with Tokyo office Tuesday 9am PST
-fc Birthday dinner Saturday 7pm at Italian restaurant downtown
+focal Lunch with Sarah tomorrow at noon
+focal Team standup every Monday at 10am
+focal Doctor appointment next Friday at 3:30pm at Medical Center
+focal Conference call with Tokyo office Tuesday 9am PST
+focal Birthday dinner Saturday 7pm at Italian restaurant downtown
 ```
 
 ## 🏗️ Architecture
@@ -123,16 +123,16 @@ python3 package_workflow.py
 ## 📝 Examples
 
 ### Simple Events
-- `fc Coffee at 3pm` → "Coffee today at 3:00 PM"
-- `fc Lunch tomorrow` → "Lunch tomorrow at 12:00 PM"
+- `focal Coffee at 3pm` → "Coffee today at 3:00 PM"
+- `focal Lunch tomorrow` → "Lunch tomorrow at 12:00 PM"
 
 ### Complex Events
-- `fc Meeting with design team about Q4 planning next Tuesday from 2-4pm in Conference Room A`
-- `fc Recurring standup every weekday at 9:30am starting next Monday`
+- `focal Meeting with design team about Q4 planning next Tuesday from 2-4pm in Conference Room A`
+- `focal Recurring standup every weekday at 9:30am starting next Monday`
 
 ### With Locations
-- `fc Dinner at Nobu Friday 8pm` → Includes location
-- `fc Flight to NYC tomorrow at 6am from SFO` → Recognizes airports
+- `focal Dinner at Nobu Friday 8pm` → Includes location
+- `focal Flight to NYC tomorrow at 6am from SFO` → Recognizes airports
 
 ## 🤝 Contributing
 
