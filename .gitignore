@@ -36,3 +36,18 @@ htmlcov/
 
 # Logs
 *.log
+
+# Development/test files
+test_*.py
+DEBUG_GUIDE.md
+workflow/test_*.py
+workflow/test_*.json
+workflow/package_workflow.py
+*.txt.placeholder
+icon_placeholder.txt
+
+# Claude Flow / Swarm files
+.claude-flow/
+.swarm/
+workflow/.claude-flow/
+workflow/.swarm/
