@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>bundleid</key>
+	<string>com.ericbowman.fantastical.openai</string>
+	<key>category</key>
+	<string>Productivity</string>
+	<key>connections</key>
+	<dict>
+		<key>keyword-input</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>run-script</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+	</dict>
+	<key>createdby</key>
+	<string>Eric Bowman</string>
+	<key>description</key>
+	<string>Create calendar events in Fantastical using natural language powered by OpenAI for intelligent parsing and reliable event creation</string>
+	<key>disabled</key>
+	<false/>
+	<key>name</key>
+	<string>Fantastical AI Calendar</string>
+	<key>objects</key>
+	<array>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>argumenttype</key>
+				<integer>0</integer>
+				<key>keyword</key>
+				<string>fc</string>
+				<key>subtext</key>
+				<string>Natural language event (e.g., "Lunch tomorrow at noon")</string>
+				<key>text</key>
+				<string>Create Calendar Event with AI</string>
+				<key>withspace</key>
+				<true/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.input.keyword</string>
+			<key>uid</key>
+			<string>keyword-input</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>concurrently</key>
+				<false/>
+				<key>escaping</key>
+				<integer>102</integer>
+				<key>script</key>
+				<string>./venv/bin/python3 create_event.py "{query}"</string>
+				<key>scriptargtype</key>
+				<integer>0</integer>
+				<key>scriptfile</key>
+				<string></string>
+				<key>type</key>
+				<integer>0</integer>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.action.script</string>
+			<key>uid</key>
+			<string>run-script</string>
+			<key>version</key>
+			<integer>2</integer>
+		</dict>
+	</array>
+	<key>readme</key>
+	<string>Fantastical AI Calendar - OpenAI-Powered Event Creation
+
+This workflow transforms natural language into perfectly formatted Fantastical calendar events using OpenAI's advanced language processing.
+
+WHY THIS WORKFLOW?
+Fantastical's natural language parser, while powerful, can be finicky about syntax and word order. This workflow uses OpenAI to ensure your events are always formatted correctly, reducing errors and failed event creation.
+
+FEATURES:
+• Intelligent date/time parsing
+• Automatic location extraction
+• Recurring event support
+• Fallback to direct parsing if API unavailable
+• Secure API key storage
+
+USAGE:
+Type 'fc' followed by your event in natural language:
+• fc Lunch with Sarah tomorrow at noon
+• fc Team standup every Monday at 10am
+• fc Doctor appointment next Friday at 3:30pm at Medical Center
+
+SETUP:
+1. Install the workflow
+2. Add your OpenAI API key (instructions included)
+3. Start creating events with natural language
+
+Version 1.0.0
+Created by Eric Bowman
+https://github.com/ebowman/fantastical-alfred-ai</string>
+	<key>uidata</key>
+	<dict>
+		<key>keyword-input</key>
+		<dict>
+			<key>xpos</key>
+			<real>55</real>
+			<key>ypos</key>
+			<real>55</real>
+		</dict>
+		<key>run-script</key>
+		<dict>
+			<key>xpos</key>
+			<real>300</real>
+			<key>ypos</key>
+			<real>55</real>
+		</dict>
+	</dict>
+	<key>userconfigurationconfig</key>
+	<array/>
+	<key>variablesdontexport</key>
+	<array/>
+	<key>version</key>
+	<string>1.0.0</string>
+	<key>webaddress</key>
+	<string>https://github.com/ebowman/fantastical-alfred-ai</string>
+</dict>
+</plist>

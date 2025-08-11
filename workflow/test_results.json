@@ -1,0 +1,142 @@
+{
+  "timestamp": "2025-08-11T16:44:59.354267",
+  "system_check": {
+    "tests": [
+      {
+        "name": "Fantastical Installation",
+        "passed": true,
+        "details": "Installed: True, Running: True"
+      },
+      {
+        "name": "Python Dependencies",
+        "passed": false,
+        "details": "Missing: ['openai']"
+      },
+      {
+        "name": "API Key Configuration",
+        "passed": true,
+        "details": "API key found"
+      }
+    ],
+    "status": "completed"
+  },
+  "basic_parsing": {
+    "tests": [
+      {
+        "name": "Parse: \"Lunch tomorrow at noon\"",
+        "passed": true,
+        "details": "Simple meal event with relative date",
+        "applescript": "tell application \"Fantastical\"\n  parse sentence \"Lunch tomorrow at noon\" with add immediately\nend te..."
+      },
+      {
+        "name": "Parse: \"Team meeting Monday at 2pm\"",
+        "passed": true,
+        "details": "Meeting with specific day and time",
+        "applescript": "tell application \"Fantastical\"\n  parse sentence \"team meeting on monday at 2pm\" with add immediately..."
+      },
+      {
+        "name": "Parse: \"Doctor appointment next Friday at 9:30am\"",
+        "passed": true,
+        "details": "Appointment with specific time",
+        "applescript": "tell application \"Fantastical\"\n  parse sentence \"doctor appointment next on friday at 9:30am\" with a..."
+      },
+      {
+        "name": "Parse: \"Coffee with Sarah at Starbucks tomorrow at 10am\"",
+        "passed": true,
+        "details": "Event with location",
+        "applescript": "tell application \"Fantastical\"\n  parse sentence \"coffee with sarah at starbucks on tomorrow at 10am\"..."
+      }
+    ],
+    "status": "completed"
+  },
+  "complex_scenarios": {
+    "tests": [
+      {
+        "name": "Parse: \"Quarterly business review with leadership team next Tuesday at 3:30pm in the main conference room\"",
+        "passed": true,
+        "details": "Long event title with multiple components",
+        "applescript": "tell application \"Fantastical\"\n  parse sentence \"quarterly business review with leadership team next..."
+      },
+      {
+        "name": "Parse: \"Lunch and learn: Python best practices tomorrow from 12pm to 1pm\"",
+        "passed": true,
+        "details": "Event with duration (may need special handling)",
+        "applescript": "tell application \"Fantastical\"\n  parse sentence \"Lunch and learn: Python best practices tomorrow fro..."
+      },
+      {
+        "name": "Parse: \"All hands meeting this Friday at 4pm\"",
+        "passed": true,
+        "details": "Event with \"this\" relative date",
+        "applescript": "tell application \"Fantastical\"\n  parse sentence \"all hands meeting this on friday at 4pm\" with add i..."
+      },
+      {
+        "name": "Parse: \"Date night at 7pm Saturday\"",
+        "passed": true,
+        "details": "Time before day specification",
+        "applescript": "tell application \"Fantastical\"\n  parse sentence \"date night on saturday at 7pm\" with add immediately..."
+      }
+    ],
+    "status": "completed"
+  },
+  "error_handling": {
+    "tests": [
+      {
+        "name": "Error handling: short_input",
+        "passed": true,
+        "details": "Correctly handled: Event description too short"
+      },
+      {
+        "name": "Error handling: empty_input",
+        "passed": true,
+        "details": "Correctly handled: Event description too short"
+      }
+    ],
+    "status": "completed"
+  },
+  "fallback_system": {
+    "tests": [
+      {
+        "name": "Fallback parsing: \"Lunch tomorrow at noon\"",
+        "passed": true,
+        "details": "Generated AppleScript: True"
+      },
+      {
+        "name": "Fallback parsing: \"Meeting Monday at 2pm\"",
+        "passed": true,
+        "details": "Generated AppleScript: True"
+      },
+      {
+        "name": "Fallback parsing: \"Coffee at 10am Tuesday\"",
+        "passed": true,
+        "details": "Generated AppleScript: True"
+      },
+      {
+        "name": "Fallback parsing: \"Workout at 7am\"",
+        "passed": true,
+        "details": "Generated AppleScript: True"
+      }
+    ],
+    "status": "completed"
+  },
+  "prompt_engineering": {
+    "tests": [
+      {
+        "name": "Enhanced Prompt Generation",
+        "passed": true,
+        "details": "Prompt length: 1519 characters"
+      },
+      {
+        "name": "AppleScript Validation",
+        "passed": true,
+        "details": "Valid: True, Errors: 0, Warnings: 0"
+      }
+    ],
+    "status": "completed"
+  },
+  "summary": {
+    "total_tests": 19,
+    "passed_tests": 18,
+    "success_rate": 0.9473684210526315,
+    "overall_status": "FAIL"
+  }
+}

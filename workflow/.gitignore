@@ -1,0 +1,26 @@
+# Security: Never commit API keys
+config.py
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+.pytest_cache/
+
+# Logs
+*.log
+
+# macOS
+.DS_Store
+.DS_Store?
+
+# Alfred workflow package (will be created during build)
+*.alfredworkflow
+
+# Virtual environments
+venv/
+env/
+.venv/

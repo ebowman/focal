@@ -1,0 +1,3 @@
+ICON NEEDED: Create a 1024x1024 PNG icon for the workflow
+Suggestion: Calendar with AI/robot symbol overlay
+Can use tools like SF Symbols, Sketch, or Figma
