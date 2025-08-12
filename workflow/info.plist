@@ -105,7 +105,7 @@ SETUP:
 
 Version 1.0.0
 Created by Eric Bowman
-https://github.com/ebowman/fantastical-alfred-ai</string>
+https://github.com/ebowman/focal</string>
 	<key>uidata</key>
 	<dict>
 		<key>keyword-input</key>
@@ -130,6 +130,6 @@ https://github.com/ebowman/fantastical-alfred-ai</string>
 	<key>version</key>
 	<string>1.0.0</string>
 	<key>webaddress</key>
-	<string>https://github.com/ebowman/fantastical-alfred-ai</string>
+	<string>https://github.com/ebowman/focal</string>
 </dict>
 </plist>

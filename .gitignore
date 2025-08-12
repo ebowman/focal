@@ -39,10 +39,8 @@ htmlcov/
 
 # Development/test files
 test_*.py
+test_*.json
 DEBUG_GUIDE.md
-workflow/test_*.py
-workflow/test_*.json
-workflow/package_workflow.py
 *.txt.placeholder
 icon_placeholder.txt
 

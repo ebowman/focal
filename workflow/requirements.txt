@@ -1,5 +1,0 @@
-# OpenAI API client
-openai>=1.0.0
-
-# Optional: Enhanced logging and error reporting
-# requests>=2.31.0

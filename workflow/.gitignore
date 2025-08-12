@@ -1,5 +1,8 @@
 # Security: Never commit API keys
 config.py
+.openai_key
+openai_key.txt
+*.key
 
 # Python
 __pycache__/
