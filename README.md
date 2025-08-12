@@ -4,7 +4,7 @@ Transform natural language into perfectly formatted Fantastical calendar events 
 
 ## What it does
 
-Type `focal` followed by natural language, and it creates the event in Fantastical:
+Open Alfred's input window and type `focal` followed by natural language, and it creates the event in Fantastical:
 
 ```
 focal Lunch with Sarah tomorrow at noon
@@ -12,14 +12,10 @@ focal Team standup every Monday at 10am
 focal Doctor appointment next Friday at 3:30pm at Medical Center
 ```
 
-## Installation
-
-### Quick Install (Pre-built)
-1. Download the latest `.alfredworkflow` from [Releases](https://github.com/ebowman/focal/releases)
-2. Double-click to install
-3. Start using with `focal`
-
 ### Build from Source
+
+Since your OpenAI API key is embedded in the release, you need to build this yourself:
+
 ```bash
 git clone https://github.com/ebowman/focal.git
 cd focal
