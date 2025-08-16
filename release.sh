@@ -21,10 +21,18 @@ if ! git diff --quiet HEAD || ! git diff --quiet --cached; then
 fi
 
 echo "🔍 Analyzing changes with AI..."
-python3 version.py
+
+# Ensure build environment exists
+if [ ! -d "build-venv" ]; then
+    echo "   Creating build environment..."
+    python3 -m venv build-venv
+    ./build-venv/bin/pip install --quiet openai
+fi
+
+./build-venv/bin/python3 version.py
 
 # Get the AI recommendation
-version_output=$(python3 -c "
+version_output=$(./build-venv/bin/python3 -c "
 from version import get_next_version
 result = get_next_version()
 print(f'{result[\"next_version\"]}|{result[\"bump_type\"]}|{result[\"reasoning\"]}')
