@@ -25,7 +25,9 @@ def package_workflow():
     files = [
         'info.plist',
         'create_event.py',
+        'configure.py',
         '.openai_key',
+        '.calendar_app',
         'icon.png',
     ]
     

@@ -41,3 +41,6 @@ python3 workflow/package_workflow.py
 echo ""
 echo "✅ Build complete!"
 echo "📦 Install the workflow from: dist/*.alfredworkflow"
+echo ""
+echo "💡 After installation, run configuration if needed:"
+echo "   python3 workflow/configure.py"

@@ -1,6 +1,6 @@
-FOCAL - Fantastical OpenAI Calendar Alfred Linker
+FOCAL - Smart Calendar Events with OpenAI
 
-SIMPLE WORKFLOW - NO COMPLEXITY
+SIMPLE WORKFLOW WITH DUAL CALENDAR SUPPORT
 
 ⸻
 
@@ -8,40 +8,57 @@ How to Build and Install:
 
 1. Clone the repo
 2. Add your OpenAI key: echo "sk-your-key" > workflow/.openai_key  
-3. Run: ./build.sh
-4. Install: Double-click the .alfredworkflow file in dist/
-5. Use: focal [your event]
+3. Choose calendar app: echo "calendar" OR "fantastical" > workflow/.calendar_app
+4. Run: ./build.sh
+5. Install: Double-click the .alfredworkflow file in dist/
+6. Use: focal [your event]
 
-That's it. No complexity.
+Simple, reliable, configurable.
 
 ⸻
 
 What This Does:
 
-Takes natural language → Sends to OpenAI → Creates AppleScript → Runs in Fantastical
+Natural Language → OpenAI Structured Extraction → Smart Calendar Integration
 
-Example: "focal Team meeting every Monday at 2pm"
+Two Modes:
+- Apple Calendar: Structured AppleScript with direct properties
+- Fantastical: Reliable natural language strings → parse sentence
+
+Example: "focal BTGHP Week 5 24-30 August" → Perfect all-day event
 
 ⸻
 
-File Structure (MINIMAL):
+Architecture (EVOLVED):
 
 workflow/
-  create_event.py    # 100 lines - gets key, calls OpenAI, runs AppleScript
-  info.plist         # Alfred config
-  icon.png           # Workflow icon
-  .openai_key        # Your API key (gitignored)
-  package_workflow.py # Packaging script
+  create_event.py      # ~450 lines - structured extraction, dual calendar support
+  configure.py         # Interactive configuration script
+  info.plist          # Alfred config
+  icon.png            # Workflow icon
+  .openai_key         # Your API key (gitignored)
+  .calendar_app       # Calendar preference: "calendar" or "fantastical"
+  package_workflow.py # Enhanced packaging with config files
   
-build.sh             # Checks key, creates venv, packages
+build.sh             # Checks key, creates venv, packages with config
 
 ⸻
 
-The only "complex" part is packaging the venv, which is just:
-1. python3 -m venv venv
-2. pip install openai
-3. Copy everything including venv into a zip file
+The Innovation:
+
+Instead of fragile NLP → Now uses structured data extraction:
+1. OpenAI extracts JSON: {title, dates, all_day, location, notes}
+2. Smart calendar integration:
+   - Apple Calendar: Direct AppleScript properties
+   - Fantastical: Perfect natural language generation
+3. Consistent results regardless of calendar app
 
 ⸻
 
-Important: Recurring events work! The prompt preserves "every Monday", "weekly", etc.
+Key Features:
+- All-day event detection (date ranges, vacation terms)
+- Location awareness
+- FOCAL attribution in notes
+- Enhanced logging and debugging
+- Configuration flexibility
+- Reliable multi-day events
