@@ -33,10 +33,16 @@ fi
 
 # Get the AI recommendation
 version_output=$(./build-venv/bin/python3 -c "
+import sys
 from version import get_next_version
 result = get_next_version()
-print(f'{result[\"next_version\"]}|{result[\"bump_type\"]}|{result[\"reasoning\"]}')
-")
+print(f'DATA:{result[\"next_version\"]}|{result[\"bump_type\"]}|{result[\"reasoning\"]}', file=sys.stderr)
+" 2>&1 >/dev/null | grep "^DATA:" | sed 's/^DATA://')
+
+if [ -z "$version_output" ]; then
+    echo "❌ Failed to get AI recommendation"
+    exit 1
+fi
 
 IFS='|' read -r next_version bump_type reasoning <<< "$version_output"
 
