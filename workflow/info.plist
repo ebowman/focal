@@ -103,7 +103,7 @@ SETUP:
 2. Add your OpenAI API key (instructions included)
 3. Start creating events with natural language
 
-Version {{VERSION}}
+Version 2.0.0
 Created by Eric Bowman
 https://github.com/ebowman/focal</string>
 	<key>uidata</key>
@@ -128,7 +128,7 @@ https://github.com/ebowman/focal</string>
 	<key>variablesdontexport</key>
 	<array/>
 	<key>version</key>
-	<string>{{VERSION}}</string>
+	<string>2.0.0</string>
 	<key>webaddress</key>
 	<string>https://github.com/ebowman/focal</string>
 </dict>
