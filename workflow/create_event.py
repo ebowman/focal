@@ -217,17 +217,27 @@ def create_fantastical_string(event_data, logger):
         logger.error(f"Failed to generate Fantastical string: {str(e)}")
         return None
 
-def create_fantastical_applescript(fantastical_string, event_data, logger):
+def create_fantastical_applescript(fantastical_string, event_data, user_input, logger):
     """Generate AppleScript for Fantastical using natural language string."""
     try:
-        # Add FOCAL attribution to notes if present
-        notes = "Created by FOCAL"
+        # Add FOCAL attribution with timestamp and original instruction
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        # Escape user input for AppleScript
+        escaped_user_input = user_input.replace('"', '\\"').replace('\\', '\\\\')
+        focal_attribution = f"Created by FOCAL on {timestamp}\\nOriginal: \"{escaped_user_input}\""
+        
         if event_data.get('notes'):
-            notes = f"{event_data['notes']}\\n\\nCreated by FOCAL"
+            notes = f"{event_data['notes']}\\n\\n{focal_attribution}"
+        else:
+            notes = focal_attribution
+        
+        # Escape quotes in the fantastical string and notes for AppleScript
+        escaped_fantastical_string = fantastical_string.replace('"', '\\"')
+        escaped_notes = notes.replace('"', '\\"')
         
         # Build AppleScript for Fantastical with notes
         applescript = f'''tell application "Fantastical"
-    parse sentence "{fantastical_string}" notes "{notes}" with add immediately
+    parse sentence "{escaped_fantastical_string}" notes "{escaped_notes}" with add immediately
 end tell'''
         
         logger.info("🚀 Generated AppleScript for Fantastical")
@@ -239,7 +249,7 @@ end tell'''
         logger.error(f"Failed to generate Fantastical AppleScript: {str(e)}")
         return None
 
-def create_calendar_applescript(event_data, logger):
+def create_calendar_applescript(event_data, user_input, logger):
     """Generate AppleScript for Apple Calendar using structured data."""
     try:
         # Handle null values and add FOCAL attribution
@@ -247,25 +257,28 @@ def create_calendar_applescript(event_data, logger):
         notes = event_data.get('notes') or ''
         recurrence = event_data.get('recurrence')
         
-        # Add FOCAL attribution to notes
-        if notes:
-            notes = f"{notes}\\n\\nCreated by FOCAL"
-        else:
-            notes = "Created by FOCAL"
+        # Add FOCAL attribution with timestamp and original instruction
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        # Escape user input for AppleScript
+        escaped_user_input = user_input.replace('"', '\\"').replace('\\', '\\\\')
+        focal_attribution = f"Created by FOCAL on {timestamp}\\nOriginal: \"{escaped_user_input}\""
         
-        # Escape quotes in strings
-        title = event_data['title'].replace('"', '\"')
-        location = location.replace('"', '\"')
-        notes = notes.replace('"', '\"')
+        if notes:
+            notes = f"{notes}\\n\\n{focal_attribution}"
+        else:
+            notes = focal_attribution
+        
+        # Escape quotes in strings for AppleScript
+        title = event_data['title'].replace('"', '\\"')
+        location = location.replace('"', '\\"')
+        notes = notes.replace('"', '\\"')
+        
+        # Parse dates and times for both all-day and timed events
+        start_dt = datetime.strptime(event_data['start_date'], "%Y-%m-%d")
+        end_dt = datetime.strptime(event_data['end_date'], "%Y-%m-%d")
         
         if event_data['all_day']:
-            # All-day events: parse dates only
-            from datetime import datetime, timedelta
-            start_dt = datetime.strptime(event_data['start_date'], "%Y-%m-%d")
-            end_dt = datetime.strptime(event_data['end_date'], "%Y-%m-%d")
-            # For all-day events in Apple Calendar, use end date as-is (inclusive)
-            
-            # Build AppleScript for all-day event
+            # All-day events: use dates only
             applescript = f'''tell application "Calendar"
     tell calendar "Calendar"
         set startDate to (current date)
@@ -287,27 +300,25 @@ def create_calendar_applescript(event_data, logger):
         make new event at end with properties {{summary: "{title}", start date: startDate, end date: endDate, allday event: true'''
         else:
             # Timed events: parse dates and times
-            from datetime import datetime
-            start_dt = datetime.strptime(f"{event_data['start_date']} {event_data['start_time']}", "%Y-%m-%d %H:%M")
-            end_dt = datetime.strptime(f"{event_data['end_date']} {event_data['end_time']}", "%Y-%m-%d %H:%M")
+            start_dt_full = datetime.strptime(f"{event_data['start_date']} {event_data['start_time']}", "%Y-%m-%d %H:%M")
+            end_dt_full = datetime.strptime(f"{event_data['end_date']} {event_data['end_time']}", "%Y-%m-%d %H:%M")
             
-            # Build AppleScript using date constructor approach
             applescript = f'''tell application "Calendar"
     tell calendar "Calendar"
         set startDate to (current date)
-        set year of startDate to {start_dt.year}
-        set month of startDate to {start_dt.month}
-        set day of startDate to {start_dt.day}
-        set hours of startDate to {start_dt.hour}
-        set minutes of startDate to {start_dt.minute}
+        set year of startDate to {start_dt_full.year}
+        set month of startDate to {start_dt_full.month}
+        set day of startDate to {start_dt_full.day}
+        set hours of startDate to {start_dt_full.hour}
+        set minutes of startDate to {start_dt_full.minute}
         set seconds of startDate to 0
         
         set endDate to (current date)
-        set year of endDate to {end_dt.year}
-        set month of endDate to {end_dt.month}
-        set day of endDate to {end_dt.day}
-        set hours of endDate to {end_dt.hour}
-        set minutes of endDate to {end_dt.minute}
+        set year of endDate to {end_dt_full.year}
+        set month of endDate to {end_dt_full.month}
+        set day of endDate to {end_dt_full.day}
+        set hours of endDate to {end_dt_full.hour}
+        set minutes of endDate to {end_dt_full.minute}
         set seconds of endDate to 0
         
         make new event at end with properties {{summary: "{title}", start date: startDate, end date: endDate'''
@@ -433,11 +444,11 @@ def main():
             sys.exit(1)
         
         logger.info("📋 Converting to Fantastical AppleScript...")
-        applescript = create_fantastical_applescript(fantastical_string, event_data, logger)
+        applescript = create_fantastical_applescript(fantastical_string, event_data, user_input, logger)
     else:
         # Generate structured AppleScript for Apple Calendar
         logger.info("🔧 Creating structured AppleScript for Apple Calendar...")
-        applescript = create_calendar_applescript(event_data, logger)
+        applescript = create_calendar_applescript(event_data, user_input, logger)
     
     if not applescript:
         logger.error("Failed to generate AppleScript")
