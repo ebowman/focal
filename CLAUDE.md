@@ -4,16 +4,13 @@ SIMPLE WORKFLOW WITH DUAL CALENDAR SUPPORT
 
 ⸻
 
-How to Build and Install:
+How to Install:
 
 1. Clone the repo
-2. Add your OpenAI key: echo "sk-your-key" > workflow/.openai_key  
-3. Choose calendar app: echo "calendar" OR "fantastical" > workflow/.calendar_app
-4. Run: ./build.sh
-5. Install: Double-click the .alfredworkflow file in dist/
-6. Use: focal [your event]
+2. Run: ./install.sh (handles everything: setup, build, install)
+3. Use: focal [your event]
 
-Simple, reliable, configurable.
+Simple, reliable, streamlined.
 
 ⸻
 
@@ -33,14 +30,13 @@ Architecture (EVOLVED):
 
 workflow/
   create_event.py      # ~450 lines - structured extraction, dual calendar support
-  configure.py         # Interactive configuration script
   info.plist          # Alfred config
   icon.png            # Workflow icon
   .openai_key         # Your API key (gitignored)
   .calendar_app       # Calendar preference: "calendar" or "fantastical"
   package_workflow.py # Enhanced packaging with config files
   
-build.sh             # Checks key, creates venv, packages with config
+install.sh           # Interactive setup, creates venv, packages with config
 
 ⸻
 

@@ -40,34 +40,22 @@ Choose your preferred calendar app:
 - Same intelligent processing regardless of calendar app
 - Consistent event formatting and attribution
 
-## 🚀 Installation & Setup
+## 🚀 Installation
 
-### 1. Build from Source
 Since your OpenAI API key is embedded in the workflow, you need to build it yourself:
 
 ```bash
 git clone https://github.com/ebowman/focal.git
 cd focal
-echo "sk-your-openai-api-key" > workflow/.openai_key
-./build.sh
+./install.sh  # Complete installation process
 ```
 
-### 2. Install Workflow
-Double-click the generated `.alfredworkflow` file from `dist/` to install in Alfred.
+The install script will:
+- Prompt for your OpenAI API key
+- Ask which calendar app you prefer (Apple Calendar or Fantastical)
+- Build, package, and install the workflow into Alfred
 
-### 3. Choose Your Calendar App (Optional)
-By default, FOCAL uses Apple Calendar. To switch to Fantastical:
-
-```bash
-cd workflow
-python3 configure.py
-```
-
-Or manually:
-```bash
-echo "fantastical" > workflow/.calendar_app
-./build.sh  # Rebuild to include preference
-```
+That's it! FOCAL is now ready to use.
 
 ## 📱 Usage Examples
 
@@ -132,10 +120,10 @@ echo "calendar" > workflow/.calendar_app
 echo "fantastical" > workflow/.calendar_app
 ```
 
-### Interactive Configuration
+### Reconfiguration
+To change settings after initial setup, run the install script again:
 ```bash
-cd workflow
-python3 configure.py
+./install.sh  # Will detect existing config and offer to update
 ```
 
 ## 🐛 Troubleshooting
@@ -146,19 +134,18 @@ python3 configure.py
 - Ensure your chosen calendar app is installed and running
 
 ### Wrong Calendar App?
-- Run `python3 workflow/configure.py` to change settings
+- Run `./install.sh` to change settings interactively
 - Or manually edit `.calendar_app` file and rebuild
 
 ### API Key Issues?
 - Get a new key from [OpenAI Platform](https://platform.openai.com/api-keys)
-- Update with: `echo "sk-your-new-key" > workflow/.openai_key`
-- Rebuild: `./build.sh`
+- Run `./install.sh` to update your API key interactively
 
 ## 🔐 Security & Privacy
 
 - **API keys stay local**: Your OpenAI key is embedded in the workflow, never shared
 - **No external dependencies**: All processing happens on your machine + OpenAI
-- **Event attribution**: All events include "Created by FOCAL" for transparency
+- **Event attribution**: All events include timestamp, original instruction, and "Created by FOCAL" for transparency
 
 ## 🎯 Examples in Action
 
