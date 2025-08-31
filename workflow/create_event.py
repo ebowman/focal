@@ -218,6 +218,10 @@ def create_fantastical_string(event_data, logger):
         if event_data.get('location'):
             event_string += f" at {event_data['location']}"
         
+        # Add calendar specification for Fantastical
+        if target_calendar:
+            event_string += f" /{target_calendar}"
+        
         logger.info("✨ Generated Fantastical natural language string")
         logger.info(f"🎯 FANTASTICAL SENTENCE: '{event_string}'")
         
@@ -244,11 +248,10 @@ def create_fantastical_applescript(fantastical_string, event_data, user_input, t
         # Escape quotes in the fantastical string and notes for AppleScript
         escaped_fantastical_string = fantastical_string.replace('"', '\\"')
         escaped_notes = notes.replace('"', '\\"')
-        escaped_calendar = target_calendar.replace('"', '\\"')
         
-        # Build AppleScript for Fantastical with notes and calendar
+        # Build AppleScript for Fantastical with notes (calendar is now in the sentence)
         applescript = f'''tell application "Fantastical"
-    parse sentence "{escaped_fantastical_string}" notes "{escaped_notes}" calendar "{escaped_calendar}" with add immediately
+    parse sentence "{escaped_fantastical_string}" notes "{escaped_notes}" with add immediately
 end tell'''
         
         logger.info("🚀 Generated AppleScript for Fantastical")
