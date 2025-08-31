@@ -51,8 +51,20 @@ def get_target_calendar():
 
 def create_extraction_prompt(user_input):
     """Create prompt for OpenAI to extract structured event data."""
-    today = datetime.now().strftime("%Y-%m-%d")
-    current_time = datetime.now().strftime("%H:%M")
+    from datetime import datetime, timedelta
+    
+    now = datetime.now()
+    today = now.strftime("%Y-%m-%d")
+    tomorrow = (now + timedelta(days=1)).strftime("%Y-%m-%d")
+    day_after = (now + timedelta(days=2)).strftime("%Y-%m-%d")
+    current_time = now.strftime("%H:%M")
+    current_weekday = now.strftime("%A")
+    
+    # Calculate next week days for reference
+    days_from_now = {}
+    for i in range(1, 8):
+        future_date = now + timedelta(days=i)
+        days_from_now[future_date.strftime("%A").lower()] = future_date.strftime("%Y-%m-%d")
     
     return f"""Extract event information from this natural language request and return JSON with these exact fields:
 
@@ -79,12 +91,19 @@ RULES FOR TIMED EVENTS:
 - Single day with no time → use current time: {current_time}, all_day: false
 - Specific times mentioned → use those times, all_day: false
 - If no end time, default to 1 hour after start
-- If relative date like "tomorrow", "next Monday", convert to actual date
 - For recurring events, set recurrence field appropriately
 - Use null for empty fields, not empty strings
 
-Today is {today}
-Current time is {current_time}
+DATE CONTEXT (IMPORTANT - USE THESE EXACT DATES):
+- Today is {current_weekday}, {today}
+- Tomorrow is {tomorrow}
+- Day after tomorrow is {day_after}
+- Next {days_from_now.get('monday', 'N/A')} is Monday
+- Next {days_from_now.get('tuesday', 'N/A')} is Tuesday
+- Next {days_from_now.get('wednesday', 'N/A')} is Wednesday
+- Next {days_from_now.get('thursday', 'N/A')} is Thursday
+- Next {days_from_now.get('friday', 'N/A')} is Friday
+- Current time is {current_time}
 
 Request: "{user_input}"
 
@@ -111,7 +130,7 @@ def extract_event_data(prompt, api_key, logger):
         
         json_response = response.choices[0].message.content.strip()
         logger.info("Received JSON response from OpenAI")
-        logger.debug(f"Generated JSON: {json_response}")
+        logger.info(f"🔍 OPENAI EXTRACTED JSON: {json_response}")
         
         return json_response
     except Exception as e:
@@ -288,6 +307,13 @@ def create_calendar_applescript(event_data, user_input, target_calendar, logger)
         notes = notes.replace('"', '\\"')
         calendar_name = target_calendar.replace('"', '\\"')
         
+        # Month names for AppleScript (must use constants, not numbers)
+        month_names = {
+            1: "January", 2: "February", 3: "March", 4: "April",
+            5: "May", 6: "June", 7: "July", 8: "August",
+            9: "September", 10: "October", 11: "November", 12: "December"
+        }
+        
         # Parse dates and times for both all-day and timed events
         start_dt = datetime.strptime(event_data['start_date'], "%Y-%m-%d")
         end_dt = datetime.strptime(event_data['end_date'], "%Y-%m-%d")
@@ -298,7 +324,7 @@ def create_calendar_applescript(event_data, user_input, target_calendar, logger)
     tell calendar "{calendar_name}"
         set startDate to (current date)
         set year of startDate to {start_dt.year}
-        set month of startDate to {start_dt.month}
+        set month of startDate to {month_names[start_dt.month]}
         set day of startDate to {start_dt.day}
         set hours of startDate to 0
         set minutes of startDate to 0
@@ -306,7 +332,7 @@ def create_calendar_applescript(event_data, user_input, target_calendar, logger)
         
         set endDate to (current date)
         set year of endDate to {end_dt.year}
-        set month of endDate to {end_dt.month}
+        set month of endDate to {month_names[end_dt.month]}
         set day of endDate to {end_dt.day}
         set hours of endDate to 0
         set minutes of endDate to 0
@@ -322,7 +348,7 @@ def create_calendar_applescript(event_data, user_input, target_calendar, logger)
     tell calendar "{calendar_name}"
         set startDate to (current date)
         set year of startDate to {start_dt_full.year}
-        set month of startDate to {start_dt_full.month}
+        set month of startDate to {month_names[start_dt_full.month]}
         set day of startDate to {start_dt_full.day}
         set hours of startDate to {start_dt_full.hour}
         set minutes of startDate to {start_dt_full.minute}
@@ -330,7 +356,7 @@ def create_calendar_applescript(event_data, user_input, target_calendar, logger)
         
         set endDate to (current date)
         set year of endDate to {end_dt_full.year}
-        set month of endDate to {end_dt_full.month}
+        set month of endDate to {month_names[end_dt_full.month]}
         set day of endDate to {end_dt_full.day}
         set hours of endDate to {end_dt_full.hour}
         set minutes of endDate to {end_dt_full.minute}
