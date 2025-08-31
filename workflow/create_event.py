@@ -39,6 +39,16 @@ def get_calendar_app():
     except (FileNotFoundError, IOError):
         return 'calendar'  # Default to Apple Calendar
 
+def get_target_calendar():
+    """Get target calendar name from config file."""
+    config_file = os.path.join(os.path.dirname(__file__), '.target_calendar')
+    try:
+        with open(config_file, 'r') as f:
+            calendar_name = f.read().strip()
+            return calendar_name if calendar_name else 'Calendar'
+    except (FileNotFoundError, IOError):
+        return 'Calendar'  # Default to 'Calendar'
+
 def create_extraction_prompt(user_input):
     """Create prompt for OpenAI to extract structured event data."""
     today = datetime.now().strftime("%Y-%m-%d")
@@ -249,7 +259,7 @@ end tell'''
         logger.error(f"Failed to generate Fantastical AppleScript: {str(e)}")
         return None
 
-def create_calendar_applescript(event_data, user_input, logger):
+def create_calendar_applescript(event_data, user_input, target_calendar, logger):
     """Generate AppleScript for Apple Calendar using structured data."""
     try:
         # Handle null values and add FOCAL attribution
@@ -272,6 +282,7 @@ def create_calendar_applescript(event_data, user_input, logger):
         title = event_data['title'].replace('"', '\\"')
         location = location.replace('"', '\\"')
         notes = notes.replace('"', '\\"')
+        calendar_name = target_calendar.replace('"', '\\"')
         
         # Parse dates and times for both all-day and timed events
         start_dt = datetime.strptime(event_data['start_date'], "%Y-%m-%d")
@@ -280,7 +291,7 @@ def create_calendar_applescript(event_data, user_input, logger):
         if event_data['all_day']:
             # All-day events: use dates only
             applescript = f'''tell application "Calendar"
-    tell calendar "Calendar"
+    tell calendar "{calendar_name}"
         set startDate to (current date)
         set year of startDate to {start_dt.year}
         set month of startDate to {start_dt.month}
@@ -304,7 +315,7 @@ def create_calendar_applescript(event_data, user_input, logger):
             end_dt_full = datetime.strptime(f"{event_data['end_date']} {event_data['end_time']}", "%Y-%m-%d %H:%M")
             
             applescript = f'''tell application "Calendar"
-    tell calendar "Calendar"
+    tell calendar "{calendar_name}"
         set startDate to (current date)
         set year of startDate to {start_dt_full.year}
         set month of startDate to {start_dt_full.month}
@@ -446,9 +457,13 @@ def main():
         logger.info("📋 Converting to Fantastical AppleScript...")
         applescript = create_fantastical_applescript(fantastical_string, event_data, user_input, logger)
     else:
+        # Get target calendar for Apple Calendar
+        target_calendar = get_target_calendar()
+        logger.info(f"📅 Target calendar: {target_calendar}")
+        
         # Generate structured AppleScript for Apple Calendar
         logger.info("🔧 Creating structured AppleScript for Apple Calendar...")
-        applescript = create_calendar_applescript(event_data, user_input, logger)
+        applescript = create_calendar_applescript(event_data, user_input, target_calendar, logger)
     
     if not applescript:
         logger.error("Failed to generate AppleScript")

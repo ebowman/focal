@@ -68,8 +68,11 @@ def package_workflow():
         'info.plist',
         'create_event.py',
         'configure.py',
+        'get_calendars.py',
+        'get_calendars.applescript',
         '.openai_key',
         '.calendar_app',
+        '.target_calendar',
         'icon.png',
     ]
     

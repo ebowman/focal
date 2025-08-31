@@ -29,14 +29,17 @@ Example: "focal BTGHP Week 5 24-30 August" → Perfect all-day event
 Architecture (EVOLVED):
 
 workflow/
-  create_event.py      # ~450 lines - structured extraction, dual calendar support
+  create_event.py      # ~470 lines - structured extraction, dual calendar support
   info.plist          # Alfred config
   icon.png            # Workflow icon
   .openai_key         # Your API key (gitignored)
   .calendar_app       # Calendar preference: "calendar" or "fantastical"
+  .target_calendar    # Target calendar name for Apple Calendar
+  get_calendars.py    # Fetch available calendars from Apple Calendar
+  get_calendars.applescript # AppleScript to query calendar list
   package_workflow.py # Enhanced packaging with config files
   
-install.sh           # Interactive setup, creates venv, packages with config
+install.sh           # Interactive setup, calendar selection, creates venv, packages
 
 ⸻
 
@@ -58,3 +61,5 @@ Key Features:
 - Enhanced logging and debugging
 - Configuration flexibility
 - Reliable multi-day events
+- Target calendar selection for Apple Calendar users
+- Automatic calendar discovery and interactive selection

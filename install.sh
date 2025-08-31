@@ -97,6 +97,68 @@ else
     fi
 fi
 
+# 3. Target Calendar Selection (for Apple Calendar only)
+target_calendar_file="workflow/.target_calendar"
+current_calendar=""
+
+if [ -f "$target_calendar_file" ]; then
+    current_calendar=$(cat "$target_calendar_file" 2>/dev/null || echo "")
+fi
+
+# Only configure target calendar if using Apple Calendar
+if [ "$(cat "$calendar_file")" = "calendar" ]; then
+    echo ""
+    echo "Target Calendar Selection:"
+    echo "--------------------------"
+    
+    # Get available calendars
+    echo "Fetching available calendars..."
+    calendars=$(python3 workflow/get_calendars.py 2>/dev/null)
+    
+    if [ -z "$calendars" ]; then
+        echo "⚠️  Could not fetch calendars. Using default 'Calendar'"
+        echo "Calendar" > "$target_calendar_file"
+    else
+        echo "Available calendars:"
+        i=1
+        while IFS= read -r cal; do
+            if [ "$cal" = "$current_calendar" ]; then
+                echo "   $i. $cal [CURRENT]"
+            else
+                echo "   $i. $cal"
+            fi
+            ((i++))
+        done <<< "$calendars"
+        
+        if [ -n "$current_calendar" ]; then
+            echo "   [Enter] Keep current ($current_calendar)"
+        fi
+        
+        echo ""
+        read -p "Choose calendar number (or Enter to keep current): " cal_choice
+        
+        if [ -z "$cal_choice" ] && [ -n "$current_calendar" ]; then
+            echo "✅ Keeping calendar: $current_calendar"
+        elif [ -n "$cal_choice" ]; then
+            selected_cal=$(echo "$calendars" | sed -n "${cal_choice}p")
+            if [ -n "$selected_cal" ]; then
+                echo "$selected_cal" > "$target_calendar_file"
+                echo "✅ Selected calendar: $selected_cal"
+            else
+                echo "⚠️  Invalid selection. Using first calendar"
+                first_cal=$(echo "$calendars" | head -1)
+                echo "$first_cal" > "$target_calendar_file"
+                echo "✅ Using calendar: $first_cal"
+            fi
+        else
+            # No current calendar and no choice made - use first
+            first_cal=$(echo "$calendars" | head -1)
+            echo "$first_cal" > "$target_calendar_file"
+            echo "✅ Using calendar: $first_cal"
+        fi
+    fi
+fi
+
 echo ""
 
 # Build Process

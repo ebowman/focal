@@ -53,6 +53,7 @@ cd focal
 The install script will:
 - Prompt for your OpenAI API key
 - Ask which calendar app you prefer (Apple Calendar or Fantastical)
+- For Apple Calendar: Let you select which specific calendar to use
 - Build, package, and install the workflow into Alfred
 
 That's it! FOCAL is now ready to use.
@@ -118,6 +119,16 @@ echo "calendar" > workflow/.calendar_app
 
 # Use Fantastical  
 echo "fantastical" > workflow/.calendar_app
+```
+
+### Target Calendar Selection (Apple Calendar only)
+When using Apple Calendar, you can specify which calendar to write events to:
+```bash
+# Set target calendar manually
+echo "Work" > workflow/.target_calendar
+
+# Or run install.sh to select interactively from available calendars
+./install.sh
 ```
 
 ### Reconfiguration
