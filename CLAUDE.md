@@ -34,7 +34,7 @@ workflow/
   icon.png            # Workflow icon
   .openai_key         # Your API key (gitignored)
   .calendar_app       # Calendar preference: "calendar" or "fantastical"
-  .target_calendar    # Target calendar name for Apple Calendar
+  .target_calendar    # Target calendar name for both apps
   get_calendars.py    # Fetch available calendars from Apple Calendar
   get_calendars.applescript # AppleScript to query calendar list
   package_workflow.py # Enhanced packaging with config files
@@ -61,5 +61,5 @@ Key Features:
 - Enhanced logging and debugging
 - Configuration flexibility
 - Reliable multi-day events
-- Target calendar selection for Apple Calendar users
+- Target calendar selection for both Apple Calendar and Fantastical users
 - Automatic calendar discovery and interactive selection

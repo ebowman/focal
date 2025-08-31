@@ -227,7 +227,7 @@ def create_fantastical_string(event_data, logger):
         logger.error(f"Failed to generate Fantastical string: {str(e)}")
         return None
 
-def create_fantastical_applescript(fantastical_string, event_data, user_input, logger):
+def create_fantastical_applescript(fantastical_string, event_data, user_input, target_calendar, logger):
     """Generate AppleScript for Fantastical using natural language string."""
     try:
         # Add FOCAL attribution with timestamp and original instruction
@@ -244,10 +244,11 @@ def create_fantastical_applescript(fantastical_string, event_data, user_input, l
         # Escape quotes in the fantastical string and notes for AppleScript
         escaped_fantastical_string = fantastical_string.replace('"', '\\"')
         escaped_notes = notes.replace('"', '\\"')
+        escaped_calendar = target_calendar.replace('"', '\\"')
         
-        # Build AppleScript for Fantastical with notes
+        # Build AppleScript for Fantastical with notes and calendar
         applescript = f'''tell application "Fantastical"
-    parse sentence "{escaped_fantastical_string}" notes "{escaped_notes}" with add immediately
+    parse sentence "{escaped_fantastical_string}" notes "{escaped_notes}" calendar "{escaped_calendar}" with add immediately
 end tell'''
         
         logger.info("🚀 Generated AppleScript for Fantastical")
@@ -443,6 +444,10 @@ def main():
         print("Error: Failed to extract valid event data")
         sys.exit(1)
     
+    # Get target calendar for both apps
+    target_calendar = get_target_calendar()
+    logger.info(f"📅 Target calendar: {target_calendar}")
+    
     # Generate AppleScript based on calendar app choice
     logger.info(f"🔄 Generating AppleScript for {app_name}...")
     if calendar_app == "fantastical":
@@ -455,12 +460,8 @@ def main():
             sys.exit(1)
         
         logger.info("📋 Converting to Fantastical AppleScript...")
-        applescript = create_fantastical_applescript(fantastical_string, event_data, user_input, logger)
+        applescript = create_fantastical_applescript(fantastical_string, event_data, user_input, target_calendar, logger)
     else:
-        # Get target calendar for Apple Calendar
-        target_calendar = get_target_calendar()
-        logger.info(f"📅 Target calendar: {target_calendar}")
-        
         # Generate structured AppleScript for Apple Calendar
         logger.info("🔧 Creating structured AppleScript for Apple Calendar...")
         applescript = create_calendar_applescript(event_data, user_input, target_calendar, logger)
