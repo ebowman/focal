@@ -88,14 +88,18 @@ RULES FOR ALL-DAY EVENTS:
 - If all_day: true, set start_time and end_time to null
 
 RULES FOR TIMED EVENTS:
-- Single day with no time → use current time: {current_time}, all_day: false
 - Specific times mentioned → use those times, all_day: false
+- Time mentioned without date (e.g., "at 17:00", "catch up at 5pm"):
+  * If the specified time is LATER than current time ({current_time}), use TODAY ({today})
+  * If the specified time has ALREADY PASSED today, use TOMORROW ({tomorrow})
+  * Example: Current time {current_time}, "catch up at 17:00" → use {today} if 17:00 > {current_time}
+- No time specified → default to current time ({current_time}) on appropriate date
 - If no end time, default to 1 hour after start
 - For recurring events, set recurrence field appropriately
 - Use null for empty fields, not empty strings
 
 DATE CONTEXT (IMPORTANT - USE THESE EXACT DATES):
-- Today is {current_weekday}, {today}
+- Current time is {current_time} on {current_weekday}, {today}
 - Tomorrow is {tomorrow}
 - Day after tomorrow is {day_after}
 - Next {days_from_now.get('monday', 'N/A')} is Monday
@@ -103,7 +107,6 @@ DATE CONTEXT (IMPORTANT - USE THESE EXACT DATES):
 - Next {days_from_now.get('wednesday', 'N/A')} is Wednesday
 - Next {days_from_now.get('thursday', 'N/A')} is Thursday
 - Next {days_from_now.get('friday', 'N/A')} is Friday
-- Current time is {current_time}
 
 Request: "{user_input}"
 
@@ -198,7 +201,7 @@ def parse_and_validate_event_data(json_response, logger):
         logger.error(f"Unexpected error validating event data: {str(e)}")
         return None
 
-def create_fantastical_string(event_data, logger):
+def create_fantastical_string(event_data, target_calendar, logger):
     """Generate reliable Fantastical natural language string from structured data."""
     try:
         from datetime import datetime
@@ -482,7 +485,7 @@ def main():
     if calendar_app == "fantastical":
         # Generate natural language string for Fantastical
         logger.info("📝 Creating natural language string for Fantastical NLP...")
-        fantastical_string = create_fantastical_string(event_data, logger)
+        fantastical_string = create_fantastical_string(event_data, target_calendar, logger)
         if not fantastical_string:
             logger.error("Failed to generate Fantastical string")
             print("Error: Failed to generate event string")

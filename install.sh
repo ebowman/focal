@@ -110,6 +110,31 @@ echo ""
 echo "Target Calendar Selection:"
 echo "--------------------------"
 
+# Ensure Calendar app is running and accessible before fetching calendars
+echo "Ensuring Calendar app is running..."
+
+# Check if Calendar is accessible via AppleScript
+calendar_accessible() {
+    osascript -e 'tell application "Calendar" to return (count of calendars)' >/dev/null 2>&1
+}
+
+if ! calendar_accessible; then
+    echo "Starting Calendar app..."
+    open -a "Calendar"
+    
+    # Wait for Calendar to be fully accessible (up to 10 seconds)
+    for i in {1..10}; do
+        sleep 1
+        if calendar_accessible; then
+            echo "Calendar app is now accessible"
+            break
+        fi
+        if [ $i -eq 10 ]; then
+            echo "⚠️  Calendar app may not be fully accessible"
+        fi
+    done
+fi
+
 # Get available calendars
 echo "Fetching available calendars..."
 calendars=$(python3 workflow/get_calendars.py 2>/dev/null)
@@ -176,8 +201,8 @@ cd ..
 python3 workflow/package_workflow.py
 
 echo "Installing workflow into Alfred..."
-# Find the generated .alfredworkflow file and install it
-workflow_file=$(find dist/ -name "*.alfredworkflow" | head -1)
+# Find the newest .alfredworkflow file and install it
+workflow_file=$(find dist/ -name "*.alfredworkflow" -exec ls -t {} + | head -1)
 if [ -n "$workflow_file" ]; then
     open "$workflow_file"
     echo "✅ Workflow installed in Alfred"
