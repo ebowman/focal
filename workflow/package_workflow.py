@@ -48,6 +48,20 @@ def process_template_file(src_path, dest_path, version):
     content = content.replace('{{VERSION}}', version)
     dest_path.write_text(content, encoding='utf-8')
 
+def add_to_archive(archive, file_path, build_dir):
+    """Keep relative links; run.sh restores absolute interpreter links locally."""
+    arcname = str(file_path.relative_to(build_dir))
+    if file_path.is_symlink():
+        target = os.readlink(file_path)
+        if file_path.parent == build_dir / 'venv' / 'bin' and os.path.isabs(target):
+            return
+        info = zipfile.ZipInfo(arcname)
+        info.create_system = 3
+        info.external_attr = file_path.lstat().st_mode << 16
+        archive.writestr(info, target)
+    elif file_path.is_file():
+        archive.write(file_path, arcname)
+
 def package_workflow():
     workflow_dir = Path(__file__).parent
     dist_dir = workflow_dir.parent / 'dist'
@@ -67,6 +81,8 @@ def package_workflow():
     files = [
         'info.plist',
         'create_event.py',
+        'extraction.py',
+        'run.sh',
         'configure.py',
         'get_calendars.py',
         'get_calendars.applescript',
@@ -96,9 +112,7 @@ def package_workflow():
     
     with zipfile.ZipFile(package_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
         for file_path in build_dir.rglob('*'):
-            if file_path.is_file():
-                arcname = file_path.relative_to(build_dir)
-                zipf.write(file_path, arcname)
+            add_to_archive(zipf, file_path, build_dir)
     
     # Clean up build directory
     shutil.rmtree(build_dir)

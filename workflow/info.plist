@@ -61,9 +61,9 @@
 				<key>escaping</key>
 				<integer>102</integer>
 				<key>script</key>
-				<string>./venv/bin/python3 create_event.py "{query}"</string>
+				<string>/bin/bash ./run.sh "$@"</string>
 				<key>scriptargtype</key>
-				<integer>0</integer>
+				<integer>1</integer>
 				<key>scriptfile</key>
 				<string></string>
 				<key>type</key>
@@ -88,8 +88,8 @@ Fantastical's natural language parser, while powerful, can be finicky about synt
 FEATURES:
 • Intelligent date/time parsing
 • Automatic location extraction
-• Recurring event support
-• Fallback to direct parsing if API unavailable
+• Structured Fantastical event creation
+• Terminal dry runs and persistent diagnostic logs
 • Secure API key storage
 
 USAGE:
@@ -103,7 +103,7 @@ SETUP:
 2. Add your OpenAI API key (instructions included)
 3. Start creating events with natural language
 
-Version 2.1.1
+Version 2.2.0
 Created by Eric Bowman
 https://github.com/ebowman/focal</string>
 	<key>uidata</key>
@@ -128,7 +128,7 @@ https://github.com/ebowman/focal</string>
 	<key>variablesdontexport</key>
 	<array/>
 	<key>version</key>
-	<string>2.1.4</string>
+	<string>2.2.0</string>
 	<key>webaddress</key>
 	<string>https://github.com/ebowman/focal</string>
 </dict>

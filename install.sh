@@ -61,7 +61,7 @@ if [ "$current_app" = "fantastical" ]; then
     echo "   Current: Fantastical ✓"
     echo "   Options:"
     echo "   1. Apple Calendar (structured)"
-    echo "   2. Fantastical (natural language) [CURRENT]"
+    echo "   2. Fantastical (structured URL) [CURRENT]"
     echo "   [Enter] Keep current (Fantastical)"
     echo ""
     read -p "Choose calendar app (1/2/Enter): " choice
@@ -80,7 +80,7 @@ else
     echo "   Current: Apple Calendar ✓"
     echo "   Options:"
     echo "   1. Apple Calendar (structured) [CURRENT]"
-    echo "   2. Fantastical (natural language)"
+    echo "   2. Fantastical (structured URL)"
     echo "   [Enter] Keep current (Apple Calendar)"
     echo ""
     read -p "Choose calendar app (1/2/Enter): " choice

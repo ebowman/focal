@@ -9,12 +9,15 @@ import os
 import subprocess
 import logging
 import json
-from datetime import datetime, timedelta
+import argparse
+from datetime import datetime
+from urllib.parse import urlencode, quote
+from extraction import create_extraction_prompt, extract_event_data
 
-def setup_logging():
+def setup_logging(debug=False):
     """Setup detailed logging for debugging."""
     logging.basicConfig(
-        level=logging.DEBUG,
+        level=logging.DEBUG if debug else logging.INFO,
         format='%(asctime)s - %(levelname)s - %(message)s',
         handlers=[logging.StreamHandler()]
     )
@@ -48,97 +51,6 @@ def get_target_calendar():
             return calendar_name if calendar_name else 'Calendar'
     except (FileNotFoundError, IOError):
         return 'Calendar'  # Default to 'Calendar'
-
-def create_extraction_prompt(user_input):
-    """Create prompt for OpenAI to extract structured event data."""
-    from datetime import datetime, timedelta
-    
-    now = datetime.now()
-    today = now.strftime("%Y-%m-%d")
-    tomorrow = (now + timedelta(days=1)).strftime("%Y-%m-%d")
-    day_after = (now + timedelta(days=2)).strftime("%Y-%m-%d")
-    current_time = now.strftime("%H:%M")
-    current_weekday = now.strftime("%A")
-    
-    # Calculate next week days for reference
-    days_from_now = {}
-    for i in range(1, 8):
-        future_date = now + timedelta(days=i)
-        days_from_now[future_date.strftime("%A").lower()] = future_date.strftime("%Y-%m-%d")
-    
-    return f"""Extract event information from this natural language request and return JSON with these exact fields:
-
-{{
-    "title": "event title",
-    "start_date": "YYYY-MM-DD",
-    "end_date": "YYYY-MM-DD", 
-    "all_day": true/false,
-    "start_time": "HH:MM" (24-hour format, null if all_day),
-    "end_time": "HH:MM" (24-hour format, null if all_day),
-    "location": "location or null",
-    "notes": "additional notes or null",
-    "recurrence": "daily|weekly|monthly|yearly|null"
-}}
-
-RULES FOR ALL-DAY EVENTS:
-- Date range patterns like "24-30 August", "Aug 20-25", "June 1-7" → all_day: true
-- Multi-day events without specific times → all_day: true
-- Week/vacation terminology ("Week 5", "vacation", "conference", "retreat") → all_day: true
-- Travel events ("trip to", "holiday in") → all_day: true
-- If all_day: true, set start_time and end_time to null
-
-RULES FOR TIMED EVENTS:
-- Specific times mentioned → use those times, all_day: false
-- Time mentioned without date (e.g., "at 17:00", "catch up at 5pm"):
-  * If the specified time is LATER than current time ({current_time}), use TODAY ({today})
-  * If the specified time has ALREADY PASSED today, use TOMORROW ({tomorrow})
-  * Example: Current time {current_time}, "catch up at 17:00" → use {today} if 17:00 > {current_time}
-- No time specified → default to current time ({current_time}) on appropriate date
-- If no end time, default to 1 hour after start
-- For recurring events, set recurrence field appropriately
-- Use null for empty fields, not empty strings
-
-DATE CONTEXT (IMPORTANT - USE THESE EXACT DATES):
-- Current time is {current_time} on {current_weekday}, {today}
-- Tomorrow is {tomorrow}
-- Day after tomorrow is {day_after}
-- Next {days_from_now.get('monday', 'N/A')} is Monday
-- Next {days_from_now.get('tuesday', 'N/A')} is Tuesday
-- Next {days_from_now.get('wednesday', 'N/A')} is Wednesday
-- Next {days_from_now.get('thursday', 'N/A')} is Thursday
-- Next {days_from_now.get('friday', 'N/A')} is Friday
-
-Request: "{user_input}"
-
-Return ONLY the JSON object:"""
-
-def extract_event_data(prompt, api_key, logger):
-    """Call OpenAI API to extract structured event data."""
-    try:
-        import openai
-        client = openai.OpenAI(api_key=api_key)
-        
-        logger.info("Sending extraction prompt to OpenAI")
-        logger.debug(f"Full prompt: {prompt}")
-        
-        response = client.chat.completions.create(
-            model="gpt-4",
-            messages=[
-                {"role": "system", "content": "You are an expert at extracting structured calendar event data from natural language. Always return valid JSON."},
-                {"role": "user", "content": prompt}
-            ],
-            max_tokens=300,
-            temperature=0.1
-        )
-        
-        json_response = response.choices[0].message.content.strip()
-        logger.info("Received JSON response from OpenAI")
-        logger.info(f"🔍 OPENAI EXTRACTED JSON: {json_response}")
-        
-        return json_response
-    except Exception as e:
-        logger.error(f"OpenAI API call failed: {str(e)}")
-        return None
 
 def parse_and_validate_event_data(json_response, logger):
     """Parse and validate the JSON event data from OpenAI."""
@@ -201,89 +113,51 @@ def parse_and_validate_event_data(json_response, logger):
         logger.error(f"Unexpected error validating event data: {str(e)}")
         return None
 
-def create_fantastical_string(event_data, target_calendar, logger):
-    """Generate reliable Fantastical natural language string from structured data."""
+def create_fantastical_url(event_data, user_input, target_calendar, logger):
+    """Use Fantastical's explicit fields instead of re-parsing a sentence."""
     try:
-        from datetime import datetime
-        
-        title = event_data['title']
-        
+        if event_data.get('recurrence'):
+            raise ValueError("Recurring events are not supported by Fantastical's structured URL API")
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        attribution = f'Created by FOCAL on {timestamp}\nOriginal: "{user_input}"'
+        notes = event_data.get('notes')
+        params = {
+            "title": event_data['title'],
+            "start": event_data['start_date'],
+            "end": event_data['end_date'],
+            "calendarName": target_calendar,
+            "notes": f"{notes}\n\n{attribution}" if notes else attribution,
+            "add": "1",
+        }
         if event_data['all_day']:
-            # All-day events: "BTGHP Week 5 from August 24 to August 30"
-            start_dt = datetime.strptime(event_data['start_date'], '%Y-%m-%d')
-            end_dt = datetime.strptime(event_data['end_date'], '%Y-%m-%d')
-            
-            if event_data['start_date'] == event_data['end_date']:
-                # Single day all-day: "BTGHP Week 5 on August 24, 2025"
-                event_string = f"{title} on {start_dt.strftime('%B %d, %Y')}"
-            else:
-                # Multi-day all-day: "BTGHP Week 5 from August 24 to August 30, 2025"
-                if start_dt.year == end_dt.year and start_dt.month == end_dt.month:
-                    event_string = f"{title} from {start_dt.strftime('%B %d')} to {end_dt.strftime('%d, %Y')}"
-                else:
-                    event_string = f"{title} from {start_dt.strftime('%B %d')} to {end_dt.strftime('%B %d, %Y')}"
+            params["allDay"] = "1"
         else:
-            # Timed events: "Meeting on August 17, 2025 at 2:00 PM to 3:00 PM"
-            start_dt = datetime.strptime(f"{event_data['start_date']} {event_data['start_time']}", '%Y-%m-%d %H:%M')
-            end_dt = datetime.strptime(f"{event_data['end_date']} {event_data['end_time']}", '%Y-%m-%d %H:%M')
-            
-            event_string = f"{title} on {start_dt.strftime('%B %d, %Y')} at {start_dt.strftime('%I:%M %p')}"
-            
-            # Add end time if different day or not exactly 1 hour
-            if event_data['start_date'] != event_data['end_date'] or (end_dt - start_dt).seconds != 3600:
-                if event_data['start_date'] == event_data['end_date']:
-                    event_string += f" to {end_dt.strftime('%I:%M %p')}"
-                else:
-                    event_string += f" to {end_dt.strftime('%B %d, %Y at %I:%M %p')}"
-        
-        # Add location if specified
+            params["start"] += f" {event_data['start_time']}"
+            params["end"] += f" {event_data['end_time']}"
         if event_data.get('location'):
-            event_string += f" at {event_data['location']}"
-        
-        # Add calendar specification for Fantastical
-        if target_calendar:
-            event_string += f" /{target_calendar}"
-        
-        logger.info("✨ Generated Fantastical natural language string")
-        logger.info(f"🎯 FANTASTICAL SENTENCE: '{event_string}'")
-        
-        return event_string
-        
-    except Exception as e:
-        logger.error(f"Failed to generate Fantastical string: {str(e)}")
+            params["location"] = event_data['location']
+        url = "x-fantastical://parse?" + urlencode(params, quote_via=quote)
+        logger.info("Generated structured Fantastical request")
+        logger.debug("Fantastical URL: %s", url)
+        return url
+    except (KeyError, TypeError, ValueError) as error:
+        logger.error("Failed to generate Fantastical request: %s", error)
         return None
 
-def create_fantastical_applescript(fantastical_string, event_data, user_input, target_calendar, logger):
-    """Generate AppleScript for Fantastical using natural language string."""
+def execute_fantastical_url(url, logger):
+    """Deliver a request; URL dispatch does not acknowledge event persistence."""
     try:
-        # Add FOCAL attribution with timestamp and original instruction
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        # Escape user input for AppleScript
-        escaped_user_input = user_input.replace('"', '\\"').replace('\\', '\\\\')
-        focal_attribution = f"Created by FOCAL on {timestamp}\\nOriginal: \"{escaped_user_input}\""
-        
-        if event_data.get('notes'):
-            notes = f"{event_data['notes']}\\n\\n{focal_attribution}"
-        else:
-            notes = focal_attribution
-        
-        # Escape quotes in the fantastical string and notes for AppleScript
-        escaped_fantastical_string = fantastical_string.replace('"', '\\"')
-        escaped_notes = notes.replace('"', '\\"')
-        
-        # Build AppleScript for Fantastical with notes (calendar is now in the sentence)
-        applescript = f'''tell application "Fantastical"
-    parse sentence "{escaped_fantastical_string}" notes "{escaped_notes}" with add immediately
-end tell'''
-        
-        logger.info("🚀 Generated AppleScript for Fantastical")
-        logger.debug(f"Generated AppleScript: {applescript}")
-        
-        return applescript
-        
-    except Exception as e:
-        logger.error(f"Failed to generate Fantastical AppleScript: {str(e)}")
-        return None
+        result = subprocess.run(
+            ['/usr/bin/open', '-g', url],
+            capture_output=True, text=True, timeout=30,
+        )
+    except (OSError, subprocess.SubprocessError) as error:
+        logger.error("Failed to open Fantastical: %s", error)
+        return False
+    if result.returncode != 0:
+        logger.error("Fantastical URL dispatch failed: %s", result.stderr.strip())
+        return False
+    return True
 
 def create_calendar_applescript(event_data, user_input, target_calendar, logger):
     """Generate AppleScript for Apple Calendar using structured data."""
@@ -427,15 +301,15 @@ def sanitize_input(text):
     return text.strip()
 
 def main():
-    logger = setup_logging()
+    parser = argparse.ArgumentParser(description="Create a calendar event from natural language.")
+    parser.add_argument("--dry-run", action="store_true", help="Extract and show the event without creating it")
+    parser.add_argument("--debug", action="store_true", help="Include detailed extraction and calendar request logs")
+    parser.add_argument("description", nargs="+", help="Event description")
+    args = parser.parse_args()
+    logger = setup_logging(args.debug)
     logger.info("FOCAL starting up")
     
-    if len(sys.argv) < 2:
-        logger.error("No event description provided")
-        print("Error: No event description provided")
-        sys.exit(1)
-    
-    user_input = sanitize_input(sys.argv[1])
+    user_input = sanitize_input(" ".join(args.description))
     logger.info(f"Processing user input: '{user_input}'")
     
     if not user_input:
@@ -480,39 +354,33 @@ def main():
     target_calendar = get_target_calendar()
     logger.info(f"📅 Target calendar: {target_calendar}")
     
-    # Generate AppleScript based on calendar app choice
-    logger.info(f"🔄 Generating AppleScript for {app_name}...")
     if calendar_app == "fantastical":
-        # Generate natural language string for Fantastical
-        logger.info("📝 Creating natural language string for Fantastical NLP...")
-        fantastical_string = create_fantastical_string(event_data, target_calendar, logger)
-        if not fantastical_string:
-            logger.error("Failed to generate Fantastical string")
-            print("Error: Failed to generate event string")
-            sys.exit(1)
-        
-        logger.info("📋 Converting to Fantastical AppleScript...")
-        applescript = create_fantastical_applescript(fantastical_string, event_data, user_input, target_calendar, logger)
+        request = create_fantastical_url(event_data, user_input, target_calendar, logger)
     else:
-        # Generate structured AppleScript for Apple Calendar
-        logger.info("🔧 Creating structured AppleScript for Apple Calendar...")
-        applescript = create_calendar_applescript(event_data, user_input, target_calendar, logger)
-    
-    if not applescript:
-        logger.error("Failed to generate AppleScript")
-        print("Error: Failed to generate event script")
+        request = create_calendar_applescript(event_data, user_input, target_calendar, logger)
+
+    if not request:
+        print("Error: Failed to generate calendar request; see the log for details")
         sys.exit(1)
-    
-    # Execute AppleScript
-    logger.info("Attempting to execute AppleScript")
-    app_name = "Fantastical" if calendar_app == "fantastical" else "Apple Calendar"
-    if execute_applescript(applescript, calendar_app, logger):
-        logger.info("Event created successfully!")
-        print("Event created successfully!")
+
+    if args.dry_run:
+        print(json.dumps(event_data, indent=2))
+        print(f"Dry run: no event created. Target: {app_name} / {target_calendar}")
+        logger.debug("Calendar request: %s", request)
+        return
+
+    if calendar_app == "fantastical":
+        success = execute_fantastical_url(request, logger)
+        status = "Request sent to Fantastical (check the app to confirm)"
     else:
+        success = execute_applescript(request, calendar_app, logger)
+        status = "Event created"
+    if not success:
         logger.error(f"Failed to create event in {app_name}")
         print(f"Error: Failed to create event in {app_name}")
         sys.exit(1)
+    print(f"{status}: {event_data['title']} on {event_data['start_date']} "
+          f"at {event_data.get('start_time') or 'all day'} in {target_calendar}")
 
 if __name__ == "__main__":
     main()

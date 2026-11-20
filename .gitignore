@@ -39,6 +39,7 @@ htmlcov/
 
 # Development/test files
 test_*.py
+!tests/test_*.py
 test_*.json
 DEBUG_GUIDE.md
 *.txt.placeholder

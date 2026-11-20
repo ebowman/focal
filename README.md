@@ -27,7 +27,7 @@ FOCAL intelligently detects:
 ### **Dual Calendar Support**
 Choose your preferred calendar app:
 - **Apple Calendar**: Direct structured integration
-- **Fantastical**: Reliable natural language generation
+- **Fantastical**: Structured URL integration with explicit event fields
 
 ### **Smart Event Detection** 
 - **All-day events**: "24-30 August", "vacation next week", "conference"
@@ -86,7 +86,7 @@ focal Team lunch monthly first Friday  → Monthly pattern
 2. **OpenAI Processing** → Extracts structured event data (title, dates, times, location)
 3. **Smart Calendar Integration**:
    - **Apple Calendar**: Direct AppleScript with structured properties
-   - **Fantastical**: Generated natural language optimized for Fantastical's parser
+   - **Fantastical**: Explicit title, dates, times, location, notes, and calendar via its URL API
 4. **Event Creation** → Your event appears with "Created by FOCAL" attribution
 
 ## 💡 Why FOCAL?
@@ -139,10 +139,47 @@ To change settings after initial setup, run the install script again:
 
 ## 🐛 Troubleshooting
 
+### Run Without Alfred
+
+From the repository directory, use the same runner Alfred uses:
+
+```bash
+bash workflow/run.sh --dry-run "call with Alex today at 16:30"
+bash workflow/run.sh "call with Alex today at 16:30"
+```
+
+`--dry-run` calls OpenAI and displays the extracted event without writing to
+your calendar. Add `--debug` for the prompt and generated AppleScript or URL.
+Both terminal and Alfred runs append diagnostics to
+`~/Library/Logs/FOCAL/focal.log`; failures also request a macOS notification.
+Logs contain event descriptions, so treat them as private.
+
+The installed Alfred workflow has its own configuration files. Check its
+`.calendar_app` and `.target_calendar` if terminal and Alfred results differ.
+Rebuild with `./install.sh` after updating the source.
+
+### Fantastical Integration
+
+FOCAL uses Fantastical's [structured URL API](https://flexibits.com/fantastical/help/integration)
+instead of generating a second natural-language sentence. Use a current
+Fantastical release supporting `title`, `start`, `end`, `calendarName`, and `add=1`.
+macOS confirms URL delivery, not whether Fantastical saved the event, so the
+runner reports "Request sent" rather than claiming creation.
+Recurring events are rejected explicitly because this API does not document a
+recurrence parameter.
+
 ### Events Not Appearing?
+- Read `~/Library/Logs/FOCAL/focal.log` for API, Python, or AppleScript failures
 - Check Alfred's debugger for error messages
 - Verify your OpenAI API key is valid
 - Ensure your chosen calendar app is installed and running
+- For automation permission errors, allow Alfred to control your calendar app
+  under System Settings → Privacy & Security → Automation
+- If Python reports `Library not loaded`, rebuild with `./install.sh`. Packages
+  no longer copy a version-specific Homebrew binary. On first run after import,
+  the runner restores local interpreter links using the virtualenv's Python
+  configuration, without downloading dependencies. The selected Python minor
+  version must remain installed.
 
 ### Wrong Calendar App?
 - Run `./install.sh` to change settings interactively
@@ -175,6 +212,6 @@ MIT License - see [LICENSE](LICENSE) file for details.
 ## 🙏 Acknowledgments
 
 Built with:
-- **OpenAI GPT-4** for intelligent natural language processing
+- **OpenAI GPT-4.1 mini** for intelligent natural language processing
 - **Apple Calendar/Fantastical** for calendar integration  
 - **Alfred** for seamless macOS integration
